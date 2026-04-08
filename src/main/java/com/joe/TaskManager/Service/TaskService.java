@@ -1,10 +1,12 @@
 package com.joe.TaskManager.Service;
 
+import com.joe.TaskManager.Exception.InvalidDueDateException;
 import com.joe.TaskManager.Model.Status;
 import com.joe.TaskManager.Model.Task;
 import com.joe.TaskManager.Repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 @Service
 public class TaskService {
@@ -20,18 +22,25 @@ public class TaskService {
     public Task getTaskById(Long id){return taskRepository
             .findById(id).orElseThrow(() -> new RuntimeException("Task not found")); }
 
-    public Task createTask(Task task){
+    public void createTask(Task task){
+        taskRepository.save(task);}
 
-        return taskRepository.save(task);}
-
-    public Task updateTask(Long id, Task updatedTask){
+    public void updateTask(Long id, Task updatedTask){
          Task existingTask = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
 
-         existingTask.setTitle(updatedTask.getTitle());
-         existingTask.setStatus(updatedTask.getStatus());
+         if (existingTask.getTitle() != null ) existingTask.setTitle(updatedTask.getTitle());
+         if (existingTask.getStatus() != null ) existingTask.setStatus(updatedTask.getStatus());
+
          existingTask.setDescription(updatedTask.getDescription());
-         existingTask.setDueDate(updatedTask.getDueDate());
-         return taskRepository.save(existingTask);
+
+         if(existingTask.getDueDate() != null){
+             if (updatedTask.getDueDate().isBefore(LocalDate.now())) {
+                 throw new InvalidDueDateException("Due date cannot be in the past");
+             }
+             existingTask.setDueDate(updatedTask.getDueDate());
+         }
+
+         taskRepository.save(existingTask);
     }
 
     public List<Task> getTaskByStatus(Status status){
