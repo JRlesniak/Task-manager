@@ -3,6 +3,7 @@ package com.joe.TaskManager.Controller;
 import com.joe.TaskManager.Model.Status;
 import com.joe.TaskManager.Model.Task;
 import com.joe.TaskManager.Service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,12 +32,12 @@ public class TaskController {
     public List<Task> getTaskByStatus(@PathVariable Status status) {return taskService.getTaskByStatus(status);}
 
     @PostMapping
-    public void creatTask(@RequestBody Task task){
+    public void creatTask(@RequestBody @Valid Task task){
         taskService.createTask(task);
     }
 
     @PutMapping("/{id}")
-    public void updateTask(@PathVariable Long id, @RequestBody Task task){
+    public void updateTask(@PathVariable @Valid Long id, @RequestBody Task task){
         taskService.updateTask(id , task);
     }
 

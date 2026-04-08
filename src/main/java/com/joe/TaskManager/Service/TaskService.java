@@ -5,8 +5,6 @@ import com.joe.TaskManager.Model.Task;
 import com.joe.TaskManager.Repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class TaskService {
@@ -23,12 +21,12 @@ public class TaskService {
             .findById(id).orElseThrow(() -> new RuntimeException("Task not found")); }
 
     public Task createTask(Task task){
-        validateDueDate(task);
+
         return taskRepository.save(task);}
 
     public Task updateTask(Long id, Task updatedTask){
          Task existingTask = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
-         validateDueDate(updatedTask);
+
          existingTask.setTitle(updatedTask.getTitle());
          existingTask.setStatus(updatedTask.getStatus());
          existingTask.setDescription(updatedTask.getDescription());
@@ -44,13 +42,5 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public void validateDueDate(Task task){
-        if (task.getDueDate() == null) {
-            throw new NullPointerException("Due date required");
-        }
-        if (task.getDueDate().isBefore(LocalDate.now())){
-            throw new RuntimeException("Due date cannot be in the past");
-        }
-    }
 
 }
