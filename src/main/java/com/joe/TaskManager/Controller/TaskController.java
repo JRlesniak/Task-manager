@@ -32,7 +32,7 @@ public class TaskController {
     public List<Task> getTaskByStatus(@PathVariable Status status) {return taskService.getTaskByStatus(status);}
 
     @PostMapping
-    public void creatTask(@RequestBody @Valid Task task){
+    public void createTask(@RequestBody @Valid Task task){
         taskService.createTask(task);
     }
 
@@ -44,5 +44,10 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         taskService.deleteTask(id);
+    }
+
+    @GetMapping("/overdue")
+    public List<Task> getOverdueTask(){
+        return taskService.getOverdueTasks();
     }
 }
