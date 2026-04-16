@@ -1,6 +1,7 @@
 package com.joe.TaskManager.Service;
 
 import com.joe.TaskManager.Exception.InvalidDueDateException;
+import com.joe.TaskManager.Exception.TaskNotFoundException;
 import com.joe.TaskManager.Model.Status;
 import com.joe.TaskManager.Model.Task;
 import com.joe.TaskManager.Repository.TaskRepository;
@@ -24,15 +25,30 @@ public class TaskService {
 
     public Task getTaskById(Long id) {
         return taskRepository
-                .findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+                .findById(id).orElseThrow(() -> new TaskNotFoundException("Task not found"));
     }
 
-    public void createTask(Task task) {
+    public Task createTask(Task task) {
         taskRepository.save(task);
+        return task;
     }
 
-    public void updateTask(Long id, Task updatedTask) {
-        Task existingTask = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+    public Task fullUpdateTask(Long id, Task updatedTask) {
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+        existingTask.setDescription(updatedTask.getDescription());
+        existingTask.setStatus(updatedTask.getStatus());
+        existingTask.setTitle(updatedTask.getTitle());
+        if (updatedTask.getDueDate().isBefore(LocalDate.now())) {
+            throw new InvalidDueDateException("Due date cannot be in the past");
+        }
+        existingTask.setDueDate(updatedTask.getDueDate());
+
+        return taskRepository.save(existingTask);
+    }
+
+    public Task partialUpdateTask(Long id, Task updatedTask) {
+        Task existingTask = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         if (updatedTask.getTitle() != null) {
             existingTask.setTitle(updatedTask.getTitle());
@@ -41,7 +57,9 @@ public class TaskService {
             existingTask.setStatus(updatedTask.getStatus());
         }
 
-        existingTask.setDescription(updatedTask.getDescription());
+        if (updatedTask.getDescription() != null) {
+            existingTask.setDescription(updatedTask.getDescription());
+        }
 
         if (updatedTask.getDueDate() != null) {
             if (updatedTask.getDueDate().isBefore(LocalDate.now())) {
@@ -49,8 +67,7 @@ public class TaskService {
             }
             existingTask.setDueDate(updatedTask.getDueDate());
         }
-
-        taskRepository.save(existingTask);
+        return taskRepository.save(existingTask);
     }
 
     public List<Task> getTaskByStatus(Status status) {
@@ -65,4 +82,5 @@ public class TaskService {
     public List<Task> getOverdueTasks() {
         return taskRepository.findByDueDateBeforeAndStatusNot(LocalDate.now(), Status.DONE);
     }
+
 }
