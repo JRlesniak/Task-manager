@@ -1,4 +1,4 @@
-package com.joe.TaskManager.Model;
+package com.joe.TaskManager.model;
 
 public enum Status {
     TODO,

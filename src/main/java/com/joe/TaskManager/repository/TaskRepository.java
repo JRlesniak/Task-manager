@@ -1,7 +1,7 @@
-package com.joe.TaskManager.Repository;
+package com.joe.TaskManager.repository;
 
-import com.joe.TaskManager.Model.Status;
-import com.joe.TaskManager.Model.Task;
+import com.joe.TaskManager.model.Status;
+import com.joe.TaskManager.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

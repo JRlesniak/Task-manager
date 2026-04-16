@@ -1,10 +1,10 @@
-package com.joe.TaskManager.Service;
+package com.joe.TaskManager.service;
 
-import com.joe.TaskManager.Exception.InvalidDueDateException;
-import com.joe.TaskManager.Exception.TaskNotFoundException;
-import com.joe.TaskManager.Model.Status;
-import com.joe.TaskManager.Model.Task;
-import com.joe.TaskManager.Repository.TaskRepository;
+import com.joe.TaskManager.exception.InvalidDueDateException;
+import com.joe.TaskManager.exception.TaskNotFoundException;
+import com.joe.TaskManager.model.Status;
+import com.joe.TaskManager.model.Task;
+import com.joe.TaskManager.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

@@ -1,8 +1,8 @@
-package com.joe.TaskManager.Controller;
+package com.joe.TaskManager.controller;
 
-import com.joe.TaskManager.Model.Status;
-import com.joe.TaskManager.Model.Task;
-import com.joe.TaskManager.Service.TaskService;
+import com.joe.TaskManager.model.Status;
+import com.joe.TaskManager.model.Task;
+import com.joe.TaskManager.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
