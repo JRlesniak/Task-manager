@@ -1,7 +1,6 @@
 package com.joe.TaskManager.exception;
 
 import com.joe.TaskManager.dto.ErrorResponseDTO;
-import com.joe.TaskManager.dto.ValidationErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -47,35 +48,37 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     // 3️⃣ Handle Validation Errors (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationErrors(
+    public ResponseEntity<ErrorResponseDTO> handleValidationErrors(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        Map<String, List> fieldErrors = new HashMap<>();
 
-        ValidationErrorResponse response = new ValidationErrorResponse(
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            fieldErrors
+                    .computeIfAbsent(error.getField(), key -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
+                });
+
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed",
-                request.getRequestURI(),
-                fieldErrors
+                request.getRequestURI()
+
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.badRequest().body(response);
     }
 
     // 5️⃣ Handle All Other Exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGenericException(
-            Exception ex,
             HttpServletRequest request) {
 
         ErrorResponseDTO error = new ErrorResponseDTO(

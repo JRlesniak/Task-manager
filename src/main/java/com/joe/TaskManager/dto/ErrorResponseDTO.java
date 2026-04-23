@@ -18,5 +18,6 @@ public class ErrorResponseDTO {
         this.status = status;
         this.error = error;
         this.path = path;
+
     }
 }
