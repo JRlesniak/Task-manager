@@ -1,9 +1,14 @@
 package com.joe.TaskManager.controller;
 
+import com.joe.TaskManager.dto.TaskRequestDTO;
 import com.joe.TaskManager.model.Status;
+import com.joe.TaskManager.dto.TaskResponseDTO;
 import com.joe.TaskManager.model.Task;
 import com.joe.TaskManager.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,38 +26,30 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks() {
-        List<Task> tasks = taskService.getAllTasks();
-        if (tasks.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(tasks);
-
+    public ResponseEntity<Page<TaskResponseDTO>> getAllTasks(
+            @PageableDefault(size = 5, sort = "dueDate") Pageable pageable)  {
+        return ResponseEntity.ok(taskService.getAllTasks(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable Long id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Task>> getTaskByStatus(@PathVariable Status status) {
-        List<Task> task = taskService.getTaskByStatus(status);
-        if (task.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(task);
+    public ResponseEntity<List<TaskResponseDTO>> getTaskByStatus(@PathVariable Status status) {
+        return ResponseEntity.ok(taskService.findByStatus(status));
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@Valid @RequestBody Task task) {
-        Task savedTask = taskService.createTask(task);
+    public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO task) {
+        TaskResponseDTO savedTask = taskService.createTask(task);
         URI location = URI.create("/tasks/" + savedTask.getId());
         return ResponseEntity.created(location).body(savedTask);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
     }
 
@@ -66,17 +63,19 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> fullUpdateTask(@PathVariable Long id, @RequestBody @Valid Task task) {
-        Task updated = taskService.fullUpdateTask(id, task);
+    public ResponseEntity<TaskResponseDTO> fullUpdateTask(@PathVariable Long id, @RequestBody @Valid TaskRequestDTO task) {
+        TaskResponseDTO updated = taskService.fullUpdateTask(id, task);
         return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}")// partially updates task
-    public ResponseEntity<Task> partialUpdateTask(
+    public ResponseEntity<TaskResponseDTO> partialUpdateTask(
             @PathVariable Long id,
-            @RequestBody Task task) {
+            @RequestBody TaskRequestDTO task) {
         taskService.partialUpdateTask(id, task);
-        Task updated = taskService.getTaskById(id);
+        TaskResponseDTO updated = taskService.getTaskById(id);
         return ResponseEntity.ok(updated);
     }
+
+
 }

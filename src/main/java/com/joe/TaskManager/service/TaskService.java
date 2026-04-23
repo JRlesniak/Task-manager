@@ -1,10 +1,15 @@
 package com.joe.TaskManager.service;
 
+import com.joe.TaskManager.dto.TaskRequestDTO;
+import com.joe.TaskManager.dto.TaskResponseDTO;
 import com.joe.TaskManager.exception.InvalidDueDateException;
 import com.joe.TaskManager.exception.TaskNotFoundException;
 import com.joe.TaskManager.model.Status;
 import com.joe.TaskManager.model.Task;
 import com.joe.TaskManager.repository.TaskRepository;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,21 +24,23 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public Page<TaskResponseDTO> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable)
+                .map(this::mapToDTO);
     }
 
-    public Task getTaskById(Long id) {
+    public TaskResponseDTO getTaskById(Long id) {
         return taskRepository
-                .findById(id).orElseThrow(() -> new TaskNotFoundException("Task not found"));
+                .findById(id).map(this::mapToDTO).orElseThrow(() -> new TaskNotFoundException("Task not found"));
     }
 
-    public Task createTask(Task task) {
+    public TaskResponseDTO createTask(@Valid TaskRequestDTO taskDTO) {
+        Task task = mapToEntity(taskDTO);
         taskRepository.save(task);
-        return task;
+        return mapToDTO(task);
     }
 
-    public Task fullUpdateTask(Long id, Task updatedTask) {
+    public TaskResponseDTO fullUpdateTask(Long id, @Valid TaskRequestDTO updatedTask) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
         existingTask.setDescription(updatedTask.getDescription());
@@ -44,11 +51,12 @@ public class TaskService {
         }
         existingTask.setDueDate(updatedTask.getDueDate());
 
-        return taskRepository.save(existingTask);
+        return mapToDTO(taskRepository.save(existingTask));
     }
 
-    public Task partialUpdateTask(Long id, Task updatedTask) {
-        Task existingTask = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("Task not found"));
+    public TaskResponseDTO partialUpdateTask(Long id, TaskRequestDTO updatedTask) {
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         if (updatedTask.getTitle() != null) {
             existingTask.setTitle(updatedTask.getTitle());
@@ -67,11 +75,14 @@ public class TaskService {
             }
             existingTask.setDueDate(updatedTask.getDueDate());
         }
-        return taskRepository.save(existingTask);
+        return mapToDTO(taskRepository.save(existingTask));
     }
 
-    public List<Task> getTaskByStatus(Status status) {
-        return taskRepository.getTaskByStatus(status);
+    public List<TaskResponseDTO> findByStatus(Status status) {
+        return taskRepository.findByStatus(status)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
     public void deleteTask(Long id) {
@@ -81,6 +92,25 @@ public class TaskService {
 
     public List<Task> getOverdueTasks() {
         return taskRepository.findByDueDateBeforeAndStatusNot(LocalDate.now(), Status.DONE);
+    }
+
+    private TaskResponseDTO mapToDTO(Task task) {
+        return new TaskResponseDTO(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getDueDate()
+        );
+    }
+
+    private Task mapToEntity(TaskRequestDTO dto) {
+        return new Task(
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getStatus(),
+                dto.getDueDate()
+        );
     }
 
 }

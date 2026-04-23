@@ -1,8 +1,10 @@
-package com.joe.TaskManager.model;
+package com.joe.TaskManager.dto;
 
 
+import com.joe.TaskManager.model.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,21 +14,10 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @Getter
-@Entity
 @Setter
-public class Task {
+public class TaskRequestDTO {
 
-    public Task( String title, String description, Status status, LocalDate dueDate) {
-        this.title = title;
-        this.description = description;
-        this.status = status;
-        this.dueDate = dueDate;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @NotBlank(message = "Title is required")
     private String title;
     private String description;
 
@@ -36,7 +27,5 @@ public class Task {
     @NotNull(message = "Due date is required")
     @FutureOrPresent(message = "Due date cannot be in the past")
     private LocalDate dueDate;
-
-
 
 }

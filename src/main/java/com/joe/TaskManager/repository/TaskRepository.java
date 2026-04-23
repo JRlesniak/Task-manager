@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> getTaskByStatus(Status status);
+    List<Task> findByStatus(Status status);
 
     List<Task> findByDueDateBeforeAndStatusNot(LocalDate date, Status status);
 
