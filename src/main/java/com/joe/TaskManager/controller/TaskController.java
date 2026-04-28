@@ -63,17 +63,9 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> fullUpdateTask(@PathVariable Long id, @RequestBody @Valid TaskRequestDTO task) {
+    public ResponseEntity<TaskResponseDTO> fullUpdateTask(
+            @PathVariable Long id, @RequestBody @Valid TaskRequestDTO task) {
         TaskResponseDTO updated = taskService.fullUpdateTask(id, task);
-        return ResponseEntity.ok(updated);
-    }
-
-    @PatchMapping("/{id}")// partially updates task
-    public ResponseEntity<TaskResponseDTO> partialUpdateTask(
-            @PathVariable Long id,
-            @RequestBody TaskRequestDTO task) {
-        taskService.partialUpdateTask(id, task);
-        TaskResponseDTO updated = taskService.getTaskById(id);
         return ResponseEntity.ok(updated);
     }
 

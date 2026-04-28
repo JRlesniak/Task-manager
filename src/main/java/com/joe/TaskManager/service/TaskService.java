@@ -35,17 +35,30 @@ public class TaskService {
     }
 
     public TaskResponseDTO createTask(@Valid TaskRequestDTO taskDTO) {
-        Task task = mapToEntity(taskDTO);
-        taskRepository.save(task);
-        return mapToDTO(task);
+        Task task = new Task();
+        task.setDescription(taskDTO.getDescription());
+        task.setTitle(taskDTO.getTitle());
+        task.setStatus(taskDTO.getStatus());
+        task.setDueDate(taskDTO.getDueDate());
+        Task saved = taskRepository.save(task);
+        return mapToDTO(saved);
+
     }
 
     public TaskResponseDTO fullUpdateTask(Long id, @Valid TaskRequestDTO updatedTask) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
-        existingTask.setDescription(updatedTask.getDescription());
-        existingTask.setStatus(updatedTask.getStatus());
-        existingTask.setTitle(updatedTask.getTitle());
+
+        if (updatedTask.getDescription() != null){
+            existingTask.setDescription(updatedTask.getDescription());
+        }
+        if (updatedTask.getStatus() != null){
+            existingTask.setStatus(updatedTask.getStatus());
+        }
+        if (updatedTask.getTitle() != null){
+            existingTask.setTitle(updatedTask.getTitle());
+        }
+
         if (updatedTask.getDueDate().isBefore(LocalDate.now())) {
             throw new InvalidDueDateException("Due date cannot be in the past");
         }
@@ -54,29 +67,6 @@ public class TaskService {
         return mapToDTO(taskRepository.save(existingTask));
     }
 
-    public TaskResponseDTO partialUpdateTask(Long id, TaskRequestDTO updatedTask) {
-        Task existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
-
-        if (updatedTask.getTitle() != null) {
-            existingTask.setTitle(updatedTask.getTitle());
-        }
-        if (updatedTask.getStatus() != null) {
-            existingTask.setStatus(updatedTask.getStatus());
-        }
-
-        if (updatedTask.getDescription() != null) {
-            existingTask.setDescription(updatedTask.getDescription());
-        }
-
-        if (updatedTask.getDueDate() != null) {
-            if (updatedTask.getDueDate().isBefore(LocalDate.now())) {
-                throw new InvalidDueDateException("Due date cannot be in the past");
-            }
-            existingTask.setDueDate(updatedTask.getDueDate());
-        }
-        return mapToDTO(taskRepository.save(existingTask));
-    }
 
     public List<TaskResponseDTO> findByStatus(Status status) {
         return taskRepository.findByStatus(status)
@@ -112,5 +102,6 @@ public class TaskService {
                 dto.getDueDate()
         );
     }
+
 
 }
