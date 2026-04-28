@@ -22,7 +22,6 @@ public class TaskResponseDTO {
     private String title;
     private String description;
     private Status status;
-
     private LocalDate dueDate;
 
     public TaskResponseDTO(Long id, String title, String description, Status status, LocalDate dueDate) {
